@@ -26,6 +26,7 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/terminus": "^10.2.3",
     "@nestjs/typeorm": "^10.0.2",
     "dotenv": "^16.4.5",
     "pg": "^8.11.3",

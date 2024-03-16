@@ -9,6 +9,7 @@ import { AuthService } from './application/services/auth/auth.service';
 import { UserSchema } from './infra/database/schemas/User';
 import { TaskSchema } from './infra/database/schemas/Task';
 import { ConfigModule } from '@nestjs/config';
+import { TerminusModule } from '@nestjs/terminus';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ConfigModule } from '@nestjs/config';
       database: process.env.DB_DATABASE,
       port: Number(process.env.DB_PORT),
     }),
+    TerminusModule,
   ],
   controllers: [AppController, TaskController, AuthController],
   providers: [AppService, TaskService, AuthService],
