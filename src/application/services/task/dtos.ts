@@ -14,7 +14,7 @@ export class EditTaskDTO {
 
 export class Filters {
   title?: string;
-  period?: Period;
+  period: Period;
 }
 
 export enum Period {

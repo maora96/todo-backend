@@ -13,6 +13,8 @@ import { TerminusModule } from '@nestjs/terminus';
 import { Task } from './domain/model/Task/Task';
 import { JwtModule } from '@nestjs/jwt';
 import { User } from './domain/model/User';
+import { HolidayService } from './infra/services/holidays.service';
+import { HttpModule, HttpService } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -34,9 +36,10 @@ import { User } from './domain/model/User';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '7d' },
     }),
+    HttpModule,
   ],
   controllers: [AppController, TaskController, AuthController],
-  providers: [AppService, TaskService, AuthService],
+  providers: [AppService, TaskService, AuthService, HolidayService],
   exports: [TypeOrmModule],
 })
 export class AppModule {}

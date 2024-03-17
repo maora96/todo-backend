@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Between } from 'typeorm';
 import {
-  format,
   startOfWeek,
   startOfDay,
   startOfMonth,
@@ -13,7 +12,8 @@ import {
   endOfMonth,
   endOfDay,
 } from 'date-fns';
-import { User } from 'src/domain/model/User';
+import { HolidayService } from 'src/infra/services/holidays.service';
+import { Holiday } from 'src/domain/services/IHolidaysService';
 
 export const BetweenDates = (period: Period) => {
   const end =
@@ -29,17 +29,30 @@ export const BetweenDates = (period: Period) => {
       : period === Period.DAY
       ? startOfDay(new Date())
       : startOfMonth(new Date());
+
   return Between(start, end);
 };
+interface LooseObject {
+  [key: string]: {
+    tasks: Task[];
+    holidays: Holiday[];
+  };
+}
+
+export interface QueryResults {
+  type: Period;
+  result: LooseObject;
+}
 
 @Injectable()
 export class TaskService {
   constructor(
     @InjectRepository(Task)
     private taskRepository: Repository<Task>,
+    private holidayService: HolidayService,
   ) {}
 
-  async getMany(id: string, filters: Filters): Promise<Task[]> {
+  async getMany(id: string, filters: Filters): Promise<QueryResults> {
     const tasks = await this.taskRepository.find({
       where: {
         ...(filters?.title && { title: filters?.title }),
@@ -58,7 +71,59 @@ export class TaskService {
       },
     });
 
-    return tasks;
+    const holidays = await this.holidayService.getBrazilianHolidays();
+
+    let result: LooseObject = {};
+
+    if (filters.period === Period.DAY) {
+      const start = startOfDay(new Date()).toISOString().split('T')[0];
+      const holiday = holidays.filter((holiday) => holiday.date === start);
+      result[`${start}`] = {
+        tasks: tasks.filter(
+          (task) => task.date.toISOString().split('T')[0] === start,
+        ),
+        holidays: holiday,
+      };
+    }
+
+    if (filters.period === Period.MONTH) {
+      const datesInAMonth = tasks.map(
+        (task) => task.date.toISOString().split('T')[0],
+      );
+      const uniqueDatesInAMonth = [...new Set(datesInAMonth)];
+
+      uniqueDatesInAMonth.forEach((date) => {
+        const holiday = holidays.filter((holiday) => holiday.date === date);
+        result[`${date}`] = {
+          tasks: tasks.filter(
+            (task) => task.date.toISOString().split('T')[0] === date,
+          ),
+          holidays: holiday,
+        };
+      });
+    }
+
+    if (filters?.period === Period.WEEK) {
+      const datesInAWeek = tasks.map(
+        (task) => task.date.toISOString().split('T')[0],
+      );
+      const uniqueDatesInAWeek = [...new Set(datesInAWeek)];
+
+      uniqueDatesInAWeek.forEach((date) => {
+        const holiday = holidays.filter((holiday) => holiday.date === date);
+        result[`${date}`] = {
+          tasks: tasks.filter(
+            (task) => task.date.toISOString().split('T')[0] === date,
+          ),
+          holidays: holiday,
+        };
+      });
+    }
+
+    return {
+      type: filters.period,
+      result,
+    };
   }
 
   getOne(id: string): Promise<Task> {
