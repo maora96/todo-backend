@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateTaskDTO, EditTaskDTO, Filters, Period } from './dtos';
+import { CreateTaskDTO, EditTaskDTO, Filters, Period, TagsDTO } from './dtos';
 import { Task } from 'src/domain/model/Task/Task';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Between } from 'typeorm';
 import {
   startOfWeek,
@@ -14,6 +14,7 @@ import {
 } from 'date-fns';
 import { HolidayService } from 'src/infra/services/holidays.service';
 import { Holiday } from 'src/domain/services/IHolidaysService';
+import { Tag } from 'src/domain/model/Tag/Tag';
 
 export const BetweenDates = (period: Period) => {
   const end =
@@ -49,6 +50,7 @@ export class TaskService {
   constructor(
     @InjectRepository(Task)
     private taskRepository: Repository<Task>,
+    @InjectRepository(Tag) private tagRepository: Repository<Tag>,
     private holidayService: HolidayService,
   ) {}
 
@@ -126,12 +128,31 @@ export class TaskService {
     };
   }
 
+  async getManyByTags(id: string, tags: TagsDTO): Promise<Task[]> {
+    return this.taskRepository.find({
+      where: {
+        tags: {
+          id: In(tags.tags),
+        },
+        user: {
+          id: id,
+        },
+      },
+    });
+  }
+
   getOne(id: string): Promise<Task> {
     return this.taskRepository.findOne({ where: { id } });
   }
 
   async create(newTask: CreateTaskDTO, userId: string): Promise<Task> {
-    const { title, description, date, duration } = newTask;
+    const { title, description, date, duration, tags } = newTask;
+
+    const existingTags = await this.tagRepository.find({
+      where: {
+        id: In(tags),
+      },
+    });
 
     const task = new Task(
       title,
@@ -139,6 +160,7 @@ export class TaskService {
       date,
       duration,
       userId,
+      existingTags,
       new Date(),
     );
     return this.taskRepository.save(task);
@@ -151,6 +173,18 @@ export class TaskService {
 
     if (!existingTask) {
       throw new NotFoundException('Task not found');
+    }
+
+    const { tags } = task;
+
+    const existingTags = await this.tagRepository.find({
+      where: {
+        id: In(tags),
+      },
+    });
+
+    if (existingTags) {
+      existingTask.editTags(existingTags);
     }
 
     existingTask.edit(task);

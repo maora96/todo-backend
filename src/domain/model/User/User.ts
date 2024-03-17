@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid';
-import { Task } from './Task/Task';
+import { Task } from '../Task/Task';
+import { Tag } from '../Tag/Tag';
 
 export class User {
   id: string;
@@ -11,6 +12,7 @@ export class User {
   deletedAt: Date | null;
 
   tasks!: Task[];
+  tags!: Tag[];
 
   constructor(name: string, email: string, password: string, createdAt: Date) {
     this.id = uuid();

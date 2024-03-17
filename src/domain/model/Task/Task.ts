@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid';
-import { User } from '../User';
+import { User } from '../User/User';
 import { EditTaskDTO } from './dtos';
+import { Tag } from '../Tag/Tag';
 
 export class Task {
   id: string;
@@ -14,6 +15,7 @@ export class Task {
   deletedAt: Date | null;
 
   readonly user!: User;
+  tags!: Tag[];
 
   constructor(
     title: string,
@@ -21,6 +23,7 @@ export class Task {
     date: Date,
     duration: number,
     userId: string,
+    tags: Tag[],
     createdAt: Date,
   ) {
     this.id = uuid();
@@ -29,6 +32,7 @@ export class Task {
     this.date = date;
     this.duration = duration;
     this.userId = userId;
+    this.tags = tags;
     this.createdAt = createdAt ?? new Date();
     this.updatedAt = new Date();
     this.deletedAt = null;
@@ -39,5 +43,9 @@ export class Task {
     this.description = editTaskDTO.description ?? this.description;
     this.date = editTaskDTO.date ?? this.date;
     this.duration = editTaskDTO.duration ?? this.duration;
+  }
+
+  editTags(newTags: Tag[]) {
+    this.tags = newTags;
   }
 }

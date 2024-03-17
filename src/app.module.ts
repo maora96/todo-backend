@@ -10,18 +10,19 @@ import { UserSchema } from './infra/database/schemas/User';
 import { TaskSchema } from './infra/database/schemas/Task';
 import { ConfigModule } from '@nestjs/config';
 import { TerminusModule } from '@nestjs/terminus';
-import { Task } from './domain/model/Task/Task';
 import { JwtModule } from '@nestjs/jwt';
-import { User } from './domain/model/User';
 import { HolidayService } from './infra/services/holidays.service';
-import { HttpModule, HttpService } from '@nestjs/axios';
+import { HttpModule } from '@nestjs/axios';
+import { TagService } from './application/services/tag/tag.service';
+import { TagController } from './infra/controllers/tag/tag.controller';
+import { TagSchema } from './infra/database/schemas/Tag';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      entities: [UserSchema, TaskSchema],
+      entities: [UserSchema, TaskSchema, TagSchema],
       synchronize: true,
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
@@ -30,7 +31,7 @@ import { HttpModule, HttpService } from '@nestjs/axios';
       port: Number(process.env.DB_PORT),
     }),
     TerminusModule,
-    TypeOrmModule.forFeature([Task, User]),
+    TypeOrmModule.forFeature([TaskSchema, UserSchema, TagSchema]),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
@@ -38,8 +39,8 @@ import { HttpModule, HttpService } from '@nestjs/axios';
     }),
     HttpModule,
   ],
-  controllers: [AppController, TaskController, AuthController],
-  providers: [AppService, TaskService, AuthService, HolidayService],
+  controllers: [AppController, TaskController, AuthController, TagController],
+  providers: [AppService, TaskService, AuthService, HolidayService, TagService],
   exports: [TypeOrmModule],
 })
 export class AppModule {}

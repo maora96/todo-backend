@@ -3,4 +3,5 @@ export class CreateTaskDTO {
   description: string;
   date: Date;
   duration: number;
+  tags: string[];
 }

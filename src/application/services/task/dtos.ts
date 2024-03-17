@@ -3,6 +3,7 @@ export class CreateTaskDTO {
   description: string;
   date: Date;
   duration: number;
+  tags: string[];
 }
 
 export class EditTaskDTO {
@@ -10,11 +11,16 @@ export class EditTaskDTO {
   description?: string;
   date?: Date;
   duration?: number;
+  tags?: string[];
 }
 
 export class Filters {
   title?: string;
   period: Period;
+}
+
+export class TagsDTO {
+  tags: string[];
 }
 
 export enum Period {

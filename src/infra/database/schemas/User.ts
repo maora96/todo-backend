@@ -1,5 +1,6 @@
+import { Tag } from 'src/domain/model/Tag/Tag';
 import { Task } from 'src/domain/model/Task/Task';
-import { User } from 'src/domain/model/User';
+import { User } from 'src/domain/model/User/User';
 import { EntitySchema } from 'typeorm';
 
 export const UserSchema = new EntitySchema<User>({
@@ -38,6 +39,13 @@ export const UserSchema = new EntitySchema<User>({
     tasks: {
       type: 'one-to-many',
       target: Task.name,
+      cascade: true,
+      joinColumn: true,
+      inverseSide: 'users',
+    },
+    tags: {
+      type: 'one-to-many',
+      target: Tag.name,
       cascade: true,
       joinColumn: true,
       inverseSide: 'users',

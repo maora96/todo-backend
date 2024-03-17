@@ -15,6 +15,7 @@ import { CreateTaskDTO } from './dtos/create-task.dto';
 import { EditTaskDTO } from './dtos/edit-task.dto';
 import { FiltersDTO } from './dtos/filters.dto';
 import { AuthGuard } from '../auth/admin.guard';
+import { GetByTagsDTO } from './dtos/get-by-tags.dto';
 
 @Controller('/v1/task')
 export class TaskController {
@@ -25,6 +26,13 @@ export class TaskController {
   getMany(@Query() queries: FiltersDTO, @Request() request: any) {
     const userId = request.user.sub;
     return this.taskService.getMany(userId, queries);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/tags')
+  getManyByTags(@Body() body: GetByTagsDTO, @Request() request: any) {
+    const userId = request.user.sub;
+    return this.taskService.getManyByTags(userId, body);
   }
 
   @UseGuards(AuthGuard)
