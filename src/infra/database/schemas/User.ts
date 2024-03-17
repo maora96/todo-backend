@@ -1,4 +1,4 @@
-import { Task } from 'src/domain/model/Task';
+import { Task } from 'src/domain/model/Task/Task';
 import { User } from 'src/domain/model/User';
 import { EntitySchema } from 'typeorm';
 

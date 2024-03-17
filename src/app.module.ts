@@ -10,6 +10,7 @@ import { UserSchema } from './infra/database/schemas/User';
 import { TaskSchema } from './infra/database/schemas/Task';
 import { ConfigModule } from '@nestjs/config';
 import { TerminusModule } from '@nestjs/terminus';
+import { Task } from './domain/model/Task/Task';
 
 @Module({
   imports: [
@@ -25,8 +26,10 @@ import { TerminusModule } from '@nestjs/terminus';
       port: Number(process.env.DB_PORT),
     }),
     TerminusModule,
+    TypeOrmModule.forFeature([Task]),
   ],
   controllers: [AppController, TaskController, AuthController],
   providers: [AppService, TaskService, AuthService],
+  exports: [TypeOrmModule],
 })
 export class AppModule {}

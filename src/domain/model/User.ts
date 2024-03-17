@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import { Task } from './Task';
+import { Task } from './Task/Task';
 
 export class User {
   id: string;

@@ -28,6 +28,8 @@
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/terminus": "^10.2.3",
     "@nestjs/typeorm": "^10.0.2",
+    "class-validator": "^0.14.1",
+    "date-fns": "^3.5.0",
     "dotenv": "^16.4.5",
     "pg": "^8.11.3",
     "reflect-metadata": "^0.1.13",
