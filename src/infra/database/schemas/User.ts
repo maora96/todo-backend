@@ -36,8 +36,9 @@ export const UserSchema = new EntitySchema<User>({
   },
   relations: {
     tasks: {
-      type: 'many-to-one',
+      type: 'one-to-many',
       target: Task.name,
+      cascade: true,
       joinColumn: true,
       inverseSide: 'users',
     },

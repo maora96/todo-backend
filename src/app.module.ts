@@ -11,6 +11,8 @@ import { TaskSchema } from './infra/database/schemas/Task';
 import { ConfigModule } from '@nestjs/config';
 import { TerminusModule } from '@nestjs/terminus';
 import { Task } from './domain/model/Task/Task';
+import { JwtModule } from '@nestjs/jwt';
+import { User } from './domain/model/User';
 
 @Module({
   imports: [
@@ -26,7 +28,12 @@ import { Task } from './domain/model/Task/Task';
       port: Number(process.env.DB_PORT),
     }),
     TerminusModule,
-    TypeOrmModule.forFeature([Task]),
+    TypeOrmModule.forFeature([Task, User]),
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '7d' },
+    }),
   ],
   controllers: [AppController, TaskController, AuthController],
   providers: [AppService, TaskService, AuthService],

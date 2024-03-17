@@ -12,14 +12,8 @@ export class User {
 
   tasks!: Task[];
 
-  constructor(
-    id: string,
-    name: string,
-    email: string,
-    password: string,
-    createdAt: Date,
-  ) {
-    this.id = id ?? uuid();
+  constructor(name: string, email: string, password: string, createdAt: Date) {
+    this.id = uuid();
     this.name = name;
     this.email = email;
     this.password = password;

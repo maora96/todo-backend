@@ -8,6 +8,7 @@ export class Task {
   description: string;
   date: Date;
   duration: number;
+  userId: string;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
@@ -19,6 +20,7 @@ export class Task {
     description: string,
     date: Date,
     duration: number,
+    userId: string,
     createdAt: Date,
   ) {
     this.id = uuid();
@@ -26,6 +28,7 @@ export class Task {
     this.description = description;
     this.date = date;
     this.duration = duration;
+    this.userId = userId;
     this.createdAt = createdAt ?? new Date();
     this.updatedAt = new Date();
     this.deletedAt = null;

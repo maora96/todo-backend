@@ -13,6 +13,7 @@ import {
   endOfMonth,
   endOfDay,
 } from 'date-fns';
+import { User } from 'src/domain/model/User';
 
 export const BetweenDates = (period: Period) => {
   const end =
@@ -38,7 +39,7 @@ export class TaskService {
     private taskRepository: Repository<Task>,
   ) {}
 
-  async getMany(filters: Filters): Promise<Task[]> {
+  async getMany(id: string, filters: Filters): Promise<Task[]> {
     const tasks = await this.taskRepository.find({
       where: {
         ...(filters?.title && { title: filters?.title }),
@@ -51,6 +52,9 @@ export class TaskService {
         ...(filters?.period === Period.MONTH && {
           date: BetweenDates(Period.MONTH),
         }),
+        user: {
+          id: id,
+        },
       },
     });
 
@@ -61,9 +65,17 @@ export class TaskService {
     return this.taskRepository.findOne({ where: { id } });
   }
 
-  create(newTask: CreateTaskDTO): Promise<Task> {
+  async create(newTask: CreateTaskDTO, userId: string): Promise<Task> {
     const { title, description, date, duration } = newTask;
-    const task = new Task(title, description, date, duration, new Date());
+
+    const task = new Task(
+      title,
+      description,
+      date,
+      duration,
+      userId,
+      new Date(),
+    );
     return this.taskRepository.save(task);
   }
 

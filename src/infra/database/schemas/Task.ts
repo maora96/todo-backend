@@ -24,6 +24,9 @@ export const TaskSchema = new EntitySchema<Task>({
     duration: {
       type: Number,
     },
+    userId: {
+      type: String,
+    },
     createdAt: {
       type: 'timestamp',
       createDate: true,
@@ -39,8 +42,13 @@ export const TaskSchema = new EntitySchema<Task>({
   },
   relations: {
     user: {
-      type: 'one-to-many',
+      type: 'many-to-one',
       target: User.name,
+      joinColumn: true,
+      inverseSide: 'tasks',
+      onDelete: 'CASCADE',
+      onUpdate: 'RESTRICT',
+      orphanedRowAction: 'delete',
     },
   },
 });
