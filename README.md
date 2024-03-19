@@ -28,4 +28,4 @@ $ npm run start:prod
 
 ## More
 
-- [Frontend] (https://github.com/maora96/todo-frontend)
+[Frontend](https://github.com/maora96/todo-frontend)
