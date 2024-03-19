@@ -1,6 +1,6 @@
 export class FiltersDTO {
   title?: string;
-  period: Period;
+  period?: Period;
 }
 
 enum Period {

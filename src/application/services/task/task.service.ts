@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskDTO, EditTaskDTO, Filters, Period, TagsDTO } from './dtos';
 import { Task } from 'src/domain/model/Task/Task';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { ILike, In, Repository } from 'typeorm';
 import { Between } from 'typeorm';
 import {
   startOfWeek,
@@ -33,16 +33,16 @@ export const BetweenDates = (period: Period) => {
 
   return Between(start, end);
 };
-interface LooseObject {
-  [key: string]: {
-    tasks: Task[];
-    holidays: Holiday[];
-  };
-}
+
+type result = {
+  date: string;
+  tasks: Task[];
+  holidays: Holiday[];
+};
 
 export interface QueryResults {
   type: Period;
-  result: LooseObject;
+  result: result[];
 }
 
 @Injectable()
@@ -54,10 +54,14 @@ export class TaskService {
     private holidayService: HolidayService,
   ) {}
 
-  async getMany(id: string, filters: Filters): Promise<QueryResults> {
+  async getMany(
+    id: string,
+    filters: Filters,
+    body: TagsDTO,
+  ): Promise<QueryResults> {
     const tasks = await this.taskRepository.find({
       where: {
-        ...(filters?.title && { title: filters?.title }),
+        ...(filters?.title && { title: ILike(`%${filters?.title}%`) }),
         ...(filters?.period === Period.WEEK && {
           date: BetweenDates(Period.WEEK),
         }),
@@ -67,25 +71,35 @@ export class TaskService {
         ...(filters?.period === Period.MONTH && {
           date: BetweenDates(Period.MONTH),
         }),
+        ...(body?.tags?.length > 0 && {
+          tags: {
+            id: In(body.tags),
+          },
+        }),
         user: {
           id: id,
         },
+      },
+      relations: {
+        tags: true,
       },
     });
 
     const holidays = await this.holidayService.getBrazilianHolidays();
 
-    let result: LooseObject = {};
+    let result: result[] = [];
 
     if (filters.period === Period.DAY) {
-      const start = startOfDay(new Date()).toISOString().split('T')[0];
+      const start = new Date().toISOString().split('T')[0];
+
       const holiday = holidays.filter((holiday) => holiday.date === start);
-      result[`${start}`] = {
+      result.push({
+        date: start,
         tasks: tasks.filter(
           (task) => task.date.toISOString().split('T')[0] === start,
         ),
         holidays: holiday,
-      };
+      });
     }
 
     if (filters.period === Period.MONTH) {
@@ -96,12 +110,13 @@ export class TaskService {
 
       uniqueDatesInAMonth.forEach((date) => {
         const holiday = holidays.filter((holiday) => holiday.date === date);
-        result[`${date}`] = {
+        result.push({
+          date,
           tasks: tasks.filter(
             (task) => task.date.toISOString().split('T')[0] === date,
           ),
           holidays: holiday,
-        };
+        });
       });
     }
 
@@ -113,12 +128,29 @@ export class TaskService {
 
       uniqueDatesInAWeek.forEach((date) => {
         const holiday = holidays.filter((holiday) => holiday.date === date);
-        result[`${date}`] = {
+        result.push({
+          date,
           tasks: tasks.filter(
             (task) => task.date.toISOString().split('T')[0] === date,
           ),
           holidays: holiday,
-        };
+        });
+      });
+    }
+
+    if (!filters.period) {
+      const dates = tasks.map((task) => task.date.toISOString().split('T')[0]);
+      const uniqueDates = [...new Set(dates)];
+
+      uniqueDates.forEach((date) => {
+        const holiday = holidays.filter((holiday) => holiday.date === date);
+        result.push({
+          date,
+          tasks: tasks.filter(
+            (task) => task.date.toISOString().split('T')[0] === date,
+          ),
+          holidays: holiday,
+        });
       });
     }
 
@@ -126,19 +158,6 @@ export class TaskService {
       type: filters.period,
       result,
     };
-  }
-
-  async getManyByTags(id: string, tags: TagsDTO): Promise<Task[]> {
-    return this.taskRepository.find({
-      where: {
-        tags: {
-          id: In(tags.tags),
-        },
-        user: {
-          id: id,
-        },
-      },
-    });
   }
 
   getOne(id: string): Promise<Task> {

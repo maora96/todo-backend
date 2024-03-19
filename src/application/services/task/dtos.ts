@@ -16,7 +16,7 @@ export class EditTaskDTO {
 
 export class Filters {
   title?: string;
-  period: Period;
+  period?: Period;
 }
 
 export class TagsDTO {

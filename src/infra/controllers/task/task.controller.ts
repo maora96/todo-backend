@@ -22,17 +22,14 @@ export class TaskController {
   constructor(private taskService: TaskService) {}
 
   @UseGuards(AuthGuard)
-  @Get()
-  getMany(@Query() queries: FiltersDTO, @Request() request: any) {
+  @Post('/list')
+  getMany(
+    @Body() body: GetByTagsDTO,
+    @Query() queries: FiltersDTO,
+    @Request() request: any,
+  ) {
     const userId = request.user.sub;
-    return this.taskService.getMany(userId, queries);
-  }
-
-  @UseGuards(AuthGuard)
-  @Post('/tags')
-  getManyByTags(@Body() body: GetByTagsDTO, @Request() request: any) {
-    const userId = request.user.sub;
-    return this.taskService.getManyByTags(userId, body);
+    return this.taskService.getMany(userId, queries, body);
   }
 
   @UseGuards(AuthGuard)
